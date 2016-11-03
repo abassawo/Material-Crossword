@@ -6,7 +6,7 @@ import java.util.List;
  * Created by C4Q on 10/24/16.
  */
 public class Cell {
-
+    public boolean reveal = false;
     public int getNumber() {
         return number;
     }
@@ -25,6 +25,9 @@ public class Cell {
 
     private String guess;
 
+    public Cell(){
+        //default constructor
+    }
     public Cell(String letter, int number){
         this.letter = letter;
         this.number = number;

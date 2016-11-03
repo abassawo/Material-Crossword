@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.c4q.materialcrossword.CrosswordDownloader;
 import com.example.c4q.materialcrossword.R;
 import com.example.c4q.materialcrossword.crossword.adapters.ClueRVAdapter;
 import com.example.c4q.materialcrossword.crossword.adapters.CrosswordAdapter;
@@ -32,10 +33,10 @@ public class CrosswordFragment extends Fragment {
     private static String PUZZLE_SOURCE = "puzzle_web_source";
 
 
-    public static CrosswordFragment newInstance(Crossword crossword){
+    public static CrosswordFragment newInstance(String crosswordJson){
         CrosswordFragment fragment = new CrosswordFragment();
         Bundle args = new Bundle();
-        args.putSerializable(PUZZLE_SOURCE,crossword);
+        args.putString(PUZZLE_SOURCE, crosswordJson);
         fragment.setArguments(args);
         return fragment;
     }
@@ -45,8 +46,9 @@ public class CrosswordFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         setRetainInstance(true);
-        crossword = (Crossword) getArguments().getSerializable(PUZZLE_SOURCE);
-        crosswordAdapter = new CrosswordAdapter(getActivity(), crossword, false);
+        String crosswordJson = getArguments().getString(PUZZLE_SOURCE);
+        crossword = new CrosswordDownloader().makeCrossword(crosswordJson);
+        crosswordAdapter = new CrosswordAdapter(getActivity(), crossword);
         clueAdapter = new ClueRVAdapter(crossword);
         setHasOptionsMenu(true);
         setRetainInstance(true);
@@ -88,8 +90,8 @@ public class CrosswordFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_restart:
-                crosswordAdapter = new CrosswordAdapter(getActivity(), crossword, false);
-                crosswordView.setAdapter(crosswordAdapter);
+                crosswordAdapter.reset();
+                crosswordAdapter.notifyDataSetChanged();
                 return true;
             case R.id.menu_solve_puzzle:
                 showCheatDialog();
@@ -100,10 +102,6 @@ public class CrosswordFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public void cheat() {
-        crosswordAdapter = new CrosswordAdapter(getActivity(), crossword, true);
-        crosswordView.setAdapter(crosswordAdapter);
-    }
 
     public void showCheatDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -111,7 +109,7 @@ public class CrosswordFragment extends Fragment {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                cheat();
+               crosswordAdapter.revealSolution();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {

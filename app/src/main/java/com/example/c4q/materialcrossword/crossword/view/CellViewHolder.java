@@ -20,16 +20,16 @@ import java.util.List;
  */
 
 
-public class CellViewHolder implements Mvp.View, View.OnClickListener{
+public class CellViewHolder implements Mvp.View{
     public TextView cellViewText;
     public TextView numberTV;
     private String letter;
     private CrosswordAdapter crosswordAdapter;
+    private Cell cell;
     private String acrossHint;
     private String downHint;
 
     public TextView currentCellView;
-    private Cell cell;
 
     public CellViewHolder(View itemView, CrosswordAdapter crosswordAdapter) {
         this.crosswordAdapter = crosswordAdapter;
@@ -37,48 +37,23 @@ public class CellViewHolder implements Mvp.View, View.OnClickListener{
         numberTV = (TextView) itemView.findViewById(R.id.number_tv);
         itemView.setOnClickListener(this);
         cellViewText.setOnClickListener(this);
-        cellViewText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length() > 1){
-                    s = s.subSequence(s.length() - 1, s.length());
-                    cellViewText.clearFocus();
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                cellViewText.clearFocus();
-            }
-        });
     }
 
 
-    public void bindLetter(String c){
-        bindLetter(c, false);
-    }
 
-
-    public void bindLetter(String c, boolean reveal) {
+    public void bindLetter(String c) {
         if (c == null) return;
         if (c.equals(".")) {
             currentCellView = cellViewText;
             cellViewText.setBackgroundResource(android.R.color.black);
         }
         this.letter = c;
-        if(reveal) cellViewText.setText(c);
-
     }
 
-    public void revealLetter() {
-        if (letter != null) {
-            cellViewText.setText("" + letter);
-        }
+    public void revealLetter(Cell cell) {
+        cell.reveal = true;
+        cellViewText.setText(cell.getLetter());
+
     }
 
     public void bindHint(Crossword crossword, int number) {
@@ -109,17 +84,24 @@ public class CellViewHolder implements Mvp.View, View.OnClickListener{
         return Integer.parseInt(num);
     }
 
+    public void setFocus(Cell cell){
+        cellViewText.setBackgroundResource(R.color.yellow);
+    }
+
 
     public void bindCell(Cell cell) {
         if(cell == null) return;
         this.cell = cell;
         if(cell.isSelected()){
-            cellViewText.setBackgroundResource(R.drawable.blk_border);
+            cellViewText.setBackgroundResource(R.color.yellow);
         }else{
             restoreBackgroundColor();
         }
         if(cell.getNumber() != 0)
             numberTV.setText("" + cell.getNumber());
+        if(cell.reveal){
+            cellViewText.setText(cell.getLetter());
+        }
     }
 
     public void restoreBackgroundColor() {
@@ -130,6 +112,6 @@ public class CellViewHolder implements Mvp.View, View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        cellViewText.setBackgroundResource(R.color.yellow);
+       crosswordAdapter.onClick(cell);
     }
 }

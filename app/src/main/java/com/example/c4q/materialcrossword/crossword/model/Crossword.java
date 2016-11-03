@@ -8,7 +8,7 @@ import java.util.List;
  * Created by C4Q on 10/21/16.
  */
 
-public class Crossword implements Serializable{
+public class Crossword{
 
     private Size size;
     private Answers answers;
@@ -16,7 +16,6 @@ public class Crossword implements Serializable{
     private Clues clues;
     private List<String> grid = new ArrayList<>();
     private List<Integer> gridnums = new ArrayList<>();
-
 
     public String getAuthor() {
         return author;

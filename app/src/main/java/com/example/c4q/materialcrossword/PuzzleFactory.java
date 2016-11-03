@@ -8,6 +8,7 @@ public class PuzzleFactory {
 
     public static Puzzle[] makePuzzles(){
         Puzzle[] puzzles = new Puzzle[]{
+                new Puzzle("NYT 10_28_16", R.raw.nyt_10_28_2016),
                 new Puzzle("azed_2170", R.raw.azed_2170),
                 new Puzzle("crossword1",R.raw.crossword1),
                 new Puzzle("crossword2",R.raw.crossword2),

@@ -4,6 +4,8 @@ package com.example.c4q.materialcrossword;
  * Created by C4Q on 10/27/16.
  */
 
+import android.view.View;
+
 import com.example.c4q.materialcrossword.crossword.model.Cell;
 
 /**
@@ -16,9 +18,7 @@ public class Mvp {
 
     }
 
-    public interface View{
-
-    }
+    public interface View extends android.view.View.OnClickListener{}
 
     public interface Presenter{
         void showKeyboard(Cell cell, boolean goAcross);

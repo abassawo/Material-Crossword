@@ -25,11 +25,10 @@ public class CrosswordView extends GridView{
 
 
     public void setAdapter(CrosswordAdapter adapter) {
+        super.setAdapter(adapter);
         this.adapter = adapter;
         this.crossword = adapter.getCrossword();
-        super.setNumColumns(crossword.getSize().getCols());
-        super.setAdapter(adapter);
-
+        setNumColumns(crossword.getSize().getCols());
     }
 
     public void reset() {

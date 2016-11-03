@@ -19,8 +19,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 /**
  * Created by C4Q on 10/21/16.
@@ -32,46 +30,18 @@ public class CrosswordDownloader
     private static final String TAG = CrosswordDownloader.class.getSimpleName();
     public static String source = "http://www.xwordinfo.com/JSON/Data.aspx?format=text";
 
-    public Crossword downloadCrossword(){
+    public Crossword downloadCrosswordFromWeb(){
         Log.d(TAG, "Downlaoding from source");
-        return downloadCrossword(source);
+        String body = downloadCrosswordJSON(source);
+        return new Gson().fromJson(body, Crossword.class);
 
     }
 
-    private Crossword downloadCrossword(String source){
+    public Crossword makeCrossword(String jsonBody){
+        Crossword crossword = new Gson().fromJson(jsonBody, Crossword.class);
+        JSONObject obj = null;
         try {
-            Document document = Jsoup.connect(source).get();
-            String body = document.html();
-            Log.d(TAG, body);
-            return new Gson().fromJson(body, Crossword.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-    public Crossword loadLocalCrossword(Context context, int rawFile){
-        InputStream inputStream = context.getResources().openRawResource(rawFile);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        String line;
-        StringBuilder stringBuilder = new StringBuilder();
-        Crossword crossword = null;
-        try {
-            while ((line = bufferedReader.readLine()) != null )
-            {
-                stringBuilder.append(line);
-                stringBuilder.append("\n");
-            }
-            bufferedReader.close();
-            inputStreamReader.close();
-            inputStream.close();
-            String json= stringBuilder.toString();
-            Log.d(TAG + " local ", json);
-            crossword = new Gson().fromJson(json, Crossword.class);
-            JSONObject obj = new JSONObject(json);
+            obj = new JSONObject(jsonBody);
             JSONArray gridJson = obj.getJSONArray("gridnums");
             List<Integer> gridNums = new ArrayList<>();
             Log.d(TAG, crossword.toString());
@@ -82,13 +52,49 @@ public class CrosswordDownloader
                 }
                 crossword.setGridNums(gridNums);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return crossword;
+    }
 
+    private String downloadCrosswordJSON(String source){
+        try {
+            return Jsoup.connect(source).get().html();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String downloadLocalJSON(Context context, int rawFile){
+        InputStream inputStream = context.getResources().openRawResource(rawFile);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        String line;
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            while ((line = bufferedReader.readLine()) != null )
+            {
+                stringBuilder.append(line);
+                stringBuilder.append("\n");
+            }
+            bufferedReader.close();
+            inputStreamReader.close();
+            inputStream.close();
+            String json= stringBuilder.toString();
+            return json;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public Crossword loadLocalCrossword(Context context, int rawFile){
+            String body = downloadLocalJSON(context, rawFile);
+            return makeCrossword(body);
     }
 
     public String getJSON(String endpoint){

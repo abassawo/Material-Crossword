@@ -1,12 +1,9 @@
 package com.example.c4q.materialcrossword;
 
-
-import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,15 +44,15 @@ public class MainActivity extends AppCompatActivity implements PuzzleListFragmen
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case R.id.load_todays_nyt_puzzle:
-                Toast.makeText(this, "Not yet Implemented", Toast.LENGTH_SHORT).show();
-//               new AsyncLoader().execute();
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch(item.getItemId()){
+//            case R.id.load_todays_nyt_puzzle:
+//                Toast.makeText(this, "Not yet Implemented", Toast.LENGTH_SHORT).show();
+//
+//        }
+//        return true;
+//    }
 
     public void hostFragment(Fragment fragment, String tag){
         switch (tag){
@@ -70,30 +67,11 @@ public class MainActivity extends AppCompatActivity implements PuzzleListFragmen
     @Override
     public void onPuzzleSelected(Puzzle puzzle) {
         toolbar.setSubtitle(puzzle.getName());
-        Crossword crossword  = new CrosswordDownloader().loadLocalCrossword(this, puzzle.getRawRes());
-        if(crossword != null)
-            hostFragment(CrosswordFragment.newInstance(crossword), CrosswordFragment.TAG);
+        String cwJson = new CrosswordDownloader().downloadLocalJSON(this, puzzle.getRawRes());
+        if(cwJson != null)
+            hostFragment(CrosswordFragment.newInstance(cwJson), CrosswordFragment.TAG);
     }
 
-    private class AsyncLoader extends AsyncTask<Void, Void,Crossword> {
-
-        @Override
-        protected Crossword doInBackground(Void... params) {
-            return new CrosswordDownloader().downloadCrossword();
-        }
-
-        @Override
-        protected void onPostExecute(Crossword crossword) {
-            super.onPostExecute(crossword);
-
-            if(crossword != null) {
-                Log.d(TAG, crossword.toString());
-                hostFragment(CrosswordFragment.newInstance(crossword), CrosswordFragment.TAG);
-            }else{
-                Toast.makeText(MainActivity.this, "Unable to laod crossword", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 }
 
 

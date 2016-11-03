@@ -13,6 +13,7 @@ import android.widget.Button;
 
 
 import java.lang.reflect.Field;
+import java.util.Observable;
 
 /**
  * Created by C4Q on 10/26/16.
@@ -37,6 +38,7 @@ public class PuzzleListFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         rv = (RecyclerView) view.findViewById(R.id.list_recycler);
+
         puzzles = PuzzleFactory.makePuzzles();
         rv.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         rv.setAdapter(new PuzzlesAdapter(puzzles));

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 
+import com.example.c4q.materialcrossword.crossword.presenter.PuzzleInteractionable;
 import com.example.c4q.materialcrossword.R;
 import com.example.c4q.materialcrossword.crossword.model.Cell;
 import com.example.c4q.materialcrossword.crossword.model.Crossword;
@@ -18,7 +19,7 @@ import java.util.List;
  * Created by C4Q on 10/24/16.
  */
 
-public class CrosswordAdapter extends BaseAdapter {
+public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionable{
 
     private int cols = 0, rows = 0;
     private Crossword crossword;
@@ -34,7 +35,7 @@ public class CrosswordAdapter extends BaseAdapter {
 
     private Cell[] cells;
 
-    public CrosswordAdapter(Context context, Crossword crossword, boolean reveal) {
+    public CrosswordAdapter(Context context, Crossword crossword) {
         this.context = context;
         this.crossword = crossword;
         try {
@@ -46,13 +47,12 @@ public class CrosswordAdapter extends BaseAdapter {
         } catch (Exception e){
 
         }
-        this.reveal = reveal;
     }
 
-    public CrosswordAdapter(Context context) {
-        this(context, null, false);
-
+    public void cheat(){
+        this.reveal = true;
     }
+
 
 
     @Override
@@ -79,7 +79,7 @@ public class CrosswordAdapter extends BaseAdapter {
             String c = letters.get(position);
             int num = numbers.get(position);
             viewHolder.bindCell(cells[position]);
-            viewHolder.bindLetter(c, reveal);
+            viewHolder.bindLetter(c);
             viewHolder.bindHint(crossword, num);
         }
         return convertView;
@@ -94,23 +94,47 @@ public class CrosswordAdapter extends BaseAdapter {
     }
 
     public void revealSolution() {
-        for (Cell cell : cells) {
-            viewHolder.cellViewText.setText(cell.getLetter());
+        for (int i = 0; i < cells.length; i++) {
+            cells[i].reveal = true;
+            viewHolder.revealLetter(cells[i]);
+            viewHolder.bindCell(cells[i]);
         }
+        notifyDataSetChanged();
     }
 
+    @Override
     public void reset() {
-        for (String c : letters) {
+        for (Cell cell : cells) {
+            cell.reveal = false;
             viewHolder.restoreBackgroundColor();
-            viewHolder.bindLetter(c, false);
+            viewHolder.bindLetter(cell.getLetter());
             notifyDataSetChanged();
         }
     }
 
+    @Override
+    public void reveal() {
+        for (String c : letters) {
+            viewHolder.restoreBackgroundColor();
+            viewHolder.bindLetter(c);
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void highlightAcross(Cell cell) {
+
+    }
+
+    @Override
+    public void highlightDown(Cell cell) {
+
+    }
+
     public void solveCell(Cell cell) {
         if(cell != null) {
+            cell.reveal = true;
             viewHolder.bindCell(cell);
-            viewHolder.bindLetter(cell.getLetter(), true);
         }
 
     }
@@ -124,11 +148,23 @@ public class CrosswordAdapter extends BaseAdapter {
             this.direction = Direction.ACROSS;
         }
         this.currentCell = cell;
+        viewHolder.setFocus(cell);
+        notifyDataSetChanged();
         //presenter.showKeyboardForCell();
     }
 
     public Cell getCurrentCell() {
         return currentCell;
+    }
+
+    @Override
+    public void onClick(Cell cell) {
+        cell.toggleSelect();
+        if(cell.isSelected()){
+            setCurrentCell(cell);
+        }
+        viewHolder.bindCell(cell);
+        notifyDataSetChanged();
     }
 
     private enum Direction{
