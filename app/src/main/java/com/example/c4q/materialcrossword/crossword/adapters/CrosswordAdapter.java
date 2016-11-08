@@ -39,6 +39,7 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
     private Context context;
     public CellViewHolder viewHolder;
     private boolean reveal;
+    private Cell currentCell;
 
     public List<Cell> getCells() {
         return cells;
@@ -91,22 +92,6 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
         return "";
     }
 
-//    public String findAnswerAtCell(Cell cell) {
-//        //solving for across
-//        if (cell.getLetter().equals(".")) return "";
-//        Cell pointer = cell;
-//        StringBuilder sb = new StringBuilder();
-//        int idx = cell.getPositionInCW();
-//        while (!pointer.getLetter().equals(".") && idx < cells.size() && idx % cols != 0) {
-//            Cell c = cells.get(idx);
-//            sb.append(c.getLetter());
-//            idx++;
-//        }
-////        if(acrAnswers.contains(sb.toString()))
-//        return sb.toString();
-////        return "";
-//    }
-
 
     public void cheat() {
         this.reveal = true;
@@ -127,7 +112,7 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
         if (!clickedCells.isEmpty()) {
             return clickedCells.peek();
         }
-        return null;
+        return currentCell;
     }
 
 
@@ -247,6 +232,7 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
     }
 
     public void setCurrentCell(Cell cell) {
+        currentCell = cell;
 //        Toast.makeText(context, findAnswerAtCell(cell), Toast.LENGTH_SHORT).show();
         Toast.makeText(context, cell.acrossPlaceInEnum.toString(), Toast.LENGTH_SHORT).show();
         if (isCurrentCell(cell)) {

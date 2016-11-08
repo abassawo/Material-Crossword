@@ -99,8 +99,10 @@ public class CrosswordFragment extends Fragment {
                 return true;
             case R.id.menu_solve_cell:
                Cell cell = crosswordAdapter.getCurrentCell();
-                crosswordAdapter.viewHolder.revealLetter(cell);
-                crosswordAdapter.notifyDataSetChanged();
+                if(cell != null) {
+                    crosswordAdapter.viewHolder.revealLetter(cell);
+                    crosswordAdapter.notifyDataSetChanged();
+                }
                 break;
             case R.id.menu_solve_word:
                 for(Cell c : crosswordAdapter.getCurrentSelectedCells()){

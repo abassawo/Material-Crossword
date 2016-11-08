@@ -47,11 +47,8 @@ public class CellFactory {
         }
         List<Cell> cells = new ArrayList<>();
         int min = Math.min(numbers.size(), letters.size());
-        StringBuilder sb = new StringBuilder();
+//        StringBuilder sb = new StringBuilder();
 
-        boolean startOfWord = true;
-
-        boolean endOfWord = false;
 
         for (int i = 0; i < min; i++) {
             String letter = letters.get(i);
@@ -59,18 +56,20 @@ public class CellFactory {
             Cell cell = new Cell(letter, number);
             cell.positioninCW = i;
             Log.d("Cell", letter + cell.positioninCW);
-            if(letter.equals(".")){
+//            sb.append(letter);
+//            if(acrossAnswers.contains(sb.toString())){
+//                sb.setLength(0);
+//                cell.acrossPlaceInEnum = END;
+//            }
+            if(number > 0){
+                cell.acrossPlaceInEnum = START;
+            }
+            else if(letter.equals(".")){
                 cell.acrossPlaceInEnum = NIL;
                 cell.downPlaceInEnum = Cell.DownPlaceInWord.NIL;
-                startOfWord = true;
             }
             else{
-                sb.append(letter);
                 cell.acrossPlaceInEnum = MID;
-                startOfWord = false;
-            }
-            if(startOfWord) {
-                cell.acrossPlaceInEnum = START;
             }
             cells.add(i, cell);
         }
