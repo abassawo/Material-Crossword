@@ -1,26 +1,35 @@
 package com.example.c4q.materialcrossword.crossword.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
 
 
+import com.example.c4q.materialcrossword.crossword.model.Answers;
+import com.example.c4q.materialcrossword.crossword.model.CellFactory;
+import com.example.c4q.materialcrossword.crossword.model.Direction;
 import com.example.c4q.materialcrossword.crossword.presenter.PuzzleInteractionable;
 import com.example.c4q.materialcrossword.R;
 import com.example.c4q.materialcrossword.crossword.model.Cell;
 import com.example.c4q.materialcrossword.crossword.model.Crossword;
 import com.example.c4q.materialcrossword.crossword.view.CellViewHolder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * Created by C4Q on 10/24/16.
  */
 
-public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionable{
+public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionable {
 
+    private static final String TAG = CrosswordAdapter.class.getSimpleName();
     private int cols = 0, rows = 0;
     private Crossword crossword;
     private List<String> letters;
@@ -28,31 +37,66 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
     private Context context;
     private CellViewHolder viewHolder;
     private boolean reveal;
-    private Cell currentCell;
-    public Cell[] getCells() {
+
+    public List<Cell> getCells() {
         return cells;
     }
 
-    private Cell[] cells;
+    private Stack<Cell> clickedCells = new Stack<>();
+    private List<String> acrAnswers;
+    private List<String> downAnswers;
+    Map<Cell, String> cellMap;
+
+    private List<Cell> cells;
 
     public CrosswordAdapter(Context context, Crossword crossword) {
         this.context = context;
         this.crossword = crossword;
+        readCrossword(crossword);
+        cellMap = new HashMap<>();
+
+    }
+
+    public void readCrossword(Crossword crossword) {
         try {
             cols = crossword.getSize().getCols();
             rows = crossword.getSize().getRows();
             letters = crossword.getGrid();
             numbers = crossword.getGridNums();
-            cells = Cell.makeCells(letters, numbers);
-        } catch (Exception e){
+            cells = CellFactory.makeCells(letters, numbers, crossword.getClues());
+            Answers answers = crossword.getAnswers();
+            acrAnswers = answers.getAcross();
+            downAnswers = answers.getDown();
+        } catch (Exception e) {
 
         }
+//        for (Cell cell : cells) {
+//                    if(cell.getPositionInCW() % cols == 0){
+//            Log.d(TAG + " Answer", findAnswerAtCell(cell));
+//            }
+//        }
     }
 
-    public void cheat(){
+    public String findAnswerAtCell(Cell cell) {
+        //solving for across
+        if (cell.getLetter().equals(".")) return "";
+        Cell pointer = cell;
+        StringBuilder sb = new StringBuilder();
+        int idx = cell.getPositionInCW();
+        while (!pointer.getLetter().equals(".") && idx < cells.size() && idx % cols != 0) {
+            Cell c = cells.get(idx);
+            sb.append(c.getLetter());
+            idx++;
+        }
+//        if(acrAnswers.contains(sb.toString()))
+        return sb.toString();
+//        return "";
+    }
+
+
+    public void cheat() {
         this.reveal = true;
     }
-
 
 
     @Override
@@ -61,9 +105,17 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
     }
 
     @Override
-    public Object getItem(int position) {
-        return letters.get(position); //fixme
+    public Cell getItem(int position) {
+        return cells.get(position); //fixme
     }
+
+    public Cell getCurrentCell() {
+        if (!clickedCells.isEmpty()) {
+            return clickedCells.peek();
+        }
+        return null;
+    }
+
 
     @Override
     public long getItemId(int position) {
@@ -72,17 +124,12 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(R.layout.crossword_cell, null, false);
-            viewHolder = new CellViewHolder(convertView, this);
-            String c = letters.get(position);
-            int num = numbers.get(position);
-            viewHolder.bindCell(cells[position]);
-            viewHolder.bindLetter(c);
-            viewHolder.bindHint(crossword, num);
-        }
-        return convertView;
+        Cell cell = cells.get(position);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.crossword_cell, null, false);
+        viewHolder = new CellViewHolder(view, this);
+        viewHolder.bindCell(cell);
+        return view;
     }
 
     public void setCrossword(Crossword crossword) {
@@ -94,45 +141,68 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
     }
 
     public void revealSolution() {
-        for (int i = 0; i < cells.length; i++) {
-            cells[i].reveal = true;
-            viewHolder.revealLetter(cells[i]);
-            viewHolder.bindCell(cells[i]);
+        for (int i = 0; i < cells.size(); i++) {
+            cells.get(i).reveal = true;
+            viewHolder.revealLetter(cells.get(i));
+            viewHolder.bindCell(cells.get(i));
         }
         notifyDataSetChanged();
     }
 
     @Override
     public void reset() {
+        readCrossword(crossword);
         for (Cell cell : cells) {
             cell.reveal = false;
-            viewHolder.restoreBackgroundColor();
-            viewHolder.bindLetter(cell.getLetter());
+            viewHolder.conceal();
+            viewHolder.bindCell(cell);
             notifyDataSetChanged();
+
         }
+        notifyDataSetChanged();
     }
 
     @Override
     public void reveal() {
         for (String c : letters) {
             viewHolder.restoreBackgroundColor();
-            viewHolder.bindLetter(c);
             notifyDataSetChanged();
         }
     }
 
-    @Override
-    public void highlightAcross(Cell cell) {
+    public String getAnswer(int hintNUm, Direction dir) {
+        String answer = null;
+        List<String> ansArray;
+        switch (dir) {
+            case ACROSS:
+                ansArray = acrAnswers;
+            case DOWN:
+                ansArray = downAnswers;
 
+        }
+        for (String ans : acrAnswers) {
+            if (ans.startsWith(String.valueOf(hintNUm))) {
+                answer = ans;
+            }
+        }
+        return answer;
     }
 
     @Override
-    public void highlightDown(Cell cell) {
-
+    public void highlightNeighbors(Cell cell, final Direction dir) {
+        String word = getAnswer(0, dir);
+        Log.d(TAG, "Selected " + word);
+        Toast.makeText(context, "Selected " + word, Toast.LENGTH_SHORT).show();
     }
+
+    private void highlightCell(Cell c) {
+        c.setSelected(true);
+        viewHolder.bindCell(c);
+    }
+
 
     public void solveCell(Cell cell) {
-        if(cell != null) {
+        if (cell != null) {
             cell.reveal = true;
             viewHolder.bindCell(cell);
         }
@@ -141,33 +211,42 @@ public class CrosswordAdapter extends BaseAdapter implements PuzzleInteractionab
 
     private Direction direction;
 
-    public void setCurrentCell(Cell cell) {
-        if(this.currentCell == cell){
-            this.direction = Direction.DOWN;
-        }else {
-            this.direction = Direction.ACROSS;
-        }
-        this.currentCell = cell;
-        viewHolder.setFocus(cell);
-        notifyDataSetChanged();
-        //presenter.showKeyboardForCell();
+    public boolean isCurrentCell(Cell cell) {
+        return clickedCells.isEmpty() ? false : clickedCells.peek() == cell;
     }
 
-    public Cell getCurrentCell() {
-        return currentCell;
+    public void setCurrentCell(Cell cell) {
+        Toast.makeText(context, findAnswerAtCell(cell), Toast.LENGTH_SHORT).show();
+        if (isCurrentCell(cell)) {
+            cell.setSelected(false);
+            viewHolder.restoreBackgroundColor();
+        } else {
+            while (!clickedCells.isEmpty()) {
+                Cell last = clickedCells.pop();
+                last.setSelected(false);
+                cell.toggleSelect();
+
+            }
+        }
+        clickedCells.push(cell);
+
+
+        if (isCurrentCell(cell)) {
+            this.direction = Direction.DOWN;
+        } else {
+            this.direction = Direction.ACROSS;
+        }
+        highlightNeighbors(cell, direction);
+        viewHolder.bindCell(cell);
+        notifyDataSetChanged();
+        //presenter.showKeyboardForCell();
+
     }
 
     @Override
     public void onClick(Cell cell) {
-        cell.toggleSelect();
-        if(cell.isSelected()){
-            setCurrentCell(cell);
-        }
-        viewHolder.bindCell(cell);
-        notifyDataSetChanged();
+        setCurrentCell(cell);
     }
 
-    private enum Direction{
-        ACROSS, DOWN
-    }
+
 }

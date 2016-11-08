@@ -8,8 +8,7 @@ import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 
 
-public class CrosswordInputConnection
-        extends BaseInputConnection
+public class CrosswordInputConnection extends BaseInputConnection
 {
     public interface OnInputEventListener
     {

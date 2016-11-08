@@ -1,12 +1,17 @@
 package com.example.c4q.materialcrossword.crossword.model;
 
+import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by C4Q on 10/24/16.
  */
 public class Cell {
+
     public boolean reveal = false;
+
     public int getNumber() {
         return number;
     }
@@ -20,36 +25,26 @@ public class Cell {
     }
 
     private int number;
+    public int positioninCW;
     private String letter;
     private boolean selected;
 
+    private String acrossAnswer;
+    private String downAnswer;
+
+
     private String guess;
 
-    public Cell(){
+    public Cell() {
         //default constructor
     }
-    public Cell(String letter, int number){
+
+    public Cell(String letter, int number) {
         this.letter = letter;
         this.number = number;
     }
 
-    public static Cell[] makeCells(List<String> letters, List<Integer> numbers) {
-        if(letters.size() != numbers.size()){
-            try {
-                throw new Exception("ArrayList sized must be the same");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        Cell[] cells = new Cell[letters.size()];
-        int min = Math.min(numbers.size(), letters.size());
-        for (int i = 0; i < min; i++) {
-            String letter = letters.get(i);
-            int number = numbers.get(i);
-            cells[i] = new Cell(letter, number);
-        }
-        return cells;
-    }
+
 
     public void toggleSelect() {
         selected = !selected;
@@ -60,4 +55,28 @@ public class Cell {
     }
 
 
+    public void setAcrossAnswer(String acrossAnswer) {
+        this.acrossAnswer = acrossAnswer;
+    }
+
+    public void setDownAnser(String downAnswer) {
+        this.downAnswer = downAnswer;
+    }
+
+
+    public String getAcrossAnswer() {
+        return acrossAnswer;
+    }
+
+    public boolean isActiveCell() {
+        return !letter.equals(".");
+    }
+
+    public boolean isHintNumbered(){
+        return number != 0;
+    }
+
+    public int getPositionInCW() {
+        return positioninCW;
+    }
 }

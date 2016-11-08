@@ -44,7 +44,7 @@ public class CrosswordDownloader
             obj = new JSONObject(jsonBody);
             JSONArray gridJson = obj.getJSONArray("gridnums");
             List<Integer> gridNums = new ArrayList<>();
-            Log.d(TAG, crossword.toString());
+//            Log.d(TAG, crossword.toString());
             if(crossword.getGridNums() == null) {
                 for (int i = 0; i < gridJson.length(); i++) {
                     int num = Integer.parseInt((String) gridJson.get(i));

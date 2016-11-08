@@ -22,5 +22,7 @@ public class Mvp {
 
     public interface Presenter{
         void showKeyboard(Cell cell, boolean goAcross);
+        void selectCell(Cell cell);
+        void highlightCells(Cell... cells);
     }
 }

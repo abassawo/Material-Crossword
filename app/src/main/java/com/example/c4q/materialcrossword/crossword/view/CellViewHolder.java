@@ -3,6 +3,7 @@ package com.example.c4q.materialcrossword.crossword.view;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,13 +22,13 @@ import java.util.List;
 
 
 public class CellViewHolder implements Mvp.View{
+    private static final String TAG = CellViewHolder.class.getSimpleName() ;
     public TextView cellViewText;
     public TextView numberTV;
     private String letter;
     private CrosswordAdapter crosswordAdapter;
     private Cell cell;
-    private String acrossHint;
-    private String downHint;
+
 
     public TextView currentCellView;
 
@@ -56,53 +57,25 @@ public class CellViewHolder implements Mvp.View{
 
     }
 
-    public void bindHint(Crossword crossword, int number) {
-        if (number != 0) {
-            numberTV.setText("" + number);
-            List<String> acrosses = crossword.getClues().getAcross();
-            this.acrossHint = getHint(number, acrosses);
-            List<String> downs = crossword.getClues().getDown();
-            this.downHint = getHint(number, downs);
-        }
-    }
-
-    private String getHint(int number, List<String> acrossOrDown) {
-        for (String hint : acrossOrDown) {
-            if (number == getNumber(hint)) {
-                return hint;
-            }
-        }
-        return null;
-    }
-
-    private int getNumber(String hint) {
-        int idx = hint.indexOf(".");
-        String num = "";
-        for (int i = 0; i < idx; i++) {
-            num += hint.charAt(i);
-        }
-        return Integer.parseInt(num);
-    }
-
-    public void setFocus(Cell cell){
-        cellViewText.setBackgroundResource(R.color.yellow);
-    }
-
 
     public void bindCell(Cell cell) {
         if(cell == null) return;
+        String letter = cell.getLetter();
         this.cell = cell;
-        if(cell.isSelected()){
-            cellViewText.setBackgroundResource(R.color.yellow);
+        if(cell.isSelected() || cell.equals(crosswordAdapter.getCurrentCell())){
+            highlightCell();
         }else{
             restoreBackgroundColor();
         }
+        bindLetter(letter);
         if(cell.getNumber() != 0)
             numberTV.setText("" + cell.getNumber());
         if(cell.reveal){
             cellViewText.setText(cell.getLetter());
         }
     }
+
+
 
     public void restoreBackgroundColor() {
         cellViewText.setBackgroundResource(android.R.color.transparent);
@@ -112,6 +85,14 @@ public class CellViewHolder implements Mvp.View{
 
     @Override
     public void onClick(View v) {
-       crosswordAdapter.onClick(cell);
+        crosswordAdapter.onClick(cell);
+    }
+
+    public void conceal() {
+        cellViewText.setText("");
+    }
+
+    public void highlightCell() {
+        cellViewText.setBackgroundResource(R.color.yellow);
     }
 }
