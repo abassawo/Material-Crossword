@@ -19,6 +19,7 @@ import com.example.c4q.materialcrossword.CrosswordDownloader;
 import com.example.c4q.materialcrossword.R;
 import com.example.c4q.materialcrossword.crossword.adapters.ClueRVAdapter;
 import com.example.c4q.materialcrossword.crossword.adapters.CrosswordAdapter;
+import com.example.c4q.materialcrossword.crossword.model.Cell;
 import com.example.c4q.materialcrossword.crossword.model.Crossword;
 import com.example.c4q.materialcrossword.crossword.view.CrosswordView;
 
@@ -96,6 +97,16 @@ public class CrosswordFragment extends Fragment {
             case R.id.menu_solve_puzzle:
                 showCheatDialog();
                 return true;
+            case R.id.menu_solve_cell:
+               Cell cell = crosswordAdapter.getCurrentCell();
+                crosswordAdapter.viewHolder.revealLetter(cell);
+                crosswordAdapter.notifyDataSetChanged();
+                break;
+            case R.id.menu_solve_word:
+                for(Cell c : crosswordAdapter.getCurrentSelectedCells()){
+                    crosswordAdapter.revealLetter(c);
+                }
+
             //To-do - Implement Solve Cell, Solve word, and Select Puzzle.
         }
 

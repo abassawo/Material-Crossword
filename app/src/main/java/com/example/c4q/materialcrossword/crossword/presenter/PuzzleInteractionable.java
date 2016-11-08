@@ -4,6 +4,8 @@ import com.example.c4q.materialcrossword.crossword.model.Cell;
 import com.example.c4q.materialcrossword.crossword.model.Crossword;
 import com.example.c4q.materialcrossword.crossword.model.Direction;
 
+import java.util.Set;
+
 /**
  * Created by C4Q on 11/3/16.
  */

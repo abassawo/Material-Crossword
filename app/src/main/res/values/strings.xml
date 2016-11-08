@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Material Crossword</string>
-    <string name="solve_square">Solve Square</string>
+    <string name="solve_cell">Solve Cell</string>
     <string name="solve_word">Solve Word</string>
     <string name="solve_puzzle">Solve Puzzle</string>
     <string name="restart">Restart</string>

@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class Cell {
 
+    public AcrossPlaceInWord acrossPlaceInEnum;
+    public DownPlaceInWord downPlaceInEnum;
+
     public boolean reveal = false;
 
     public int getNumber() {
@@ -78,5 +81,13 @@ public class Cell {
 
     public int getPositionInCW() {
         return positioninCW;
+    }
+
+    public enum AcrossPlaceInWord{
+        START, MID, END, NIL
+    }
+
+    public enum DownPlaceInWord{
+        START, MID, END, NIL
     }
 }

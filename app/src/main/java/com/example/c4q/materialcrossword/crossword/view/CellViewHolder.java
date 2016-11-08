@@ -1,9 +1,6 @@
 package com.example.c4q.materialcrossword.crossword.view;
 
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +51,7 @@ public class CellViewHolder implements Mvp.View{
     public void revealLetter(Cell cell) {
         cell.reveal = true;
         cellViewText.setText(cell.getLetter());
-
+        crosswordAdapter.notifyDataSetChanged();
     }
 
 
@@ -92,7 +89,7 @@ public class CellViewHolder implements Mvp.View{
         cellViewText.setText("");
     }
 
-    public void highlightCell() {
+    private void highlightCell() {
         cellViewText.setBackgroundResource(R.color.yellow);
     }
 }
